@@ -59,7 +59,7 @@ def rewrite_with_ai(title, summary):
         f"Описание: {summary}"
     )
     response = client.models.generate_content(
-        model="gemini-3.8-flash",
+        model="gemini-2.0-flash",
         contents=prompt,
     )
     return response.text.strip()
