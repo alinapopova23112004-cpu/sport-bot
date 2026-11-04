@@ -1,4 +1,5 @@
 import os
+import time
 import feedparser
 import requests
 from google import genai
@@ -58,11 +59,21 @@ def rewrite_with_ai(title, summary):
         f"Заголовок источника: {title}\n"
         f"Описание: {summary}"
     )
-    response = client.models.generate_content(
-        model="gemini-3.8-flash",
-        contents=prompt,
-    )
-    return response.text.strip()
+    
+    # Автоматические попытки при временной нагрузке на сервер (ошибка 503)
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.8-flash",
+                contents=prompt,
+            )
+            return response.text.strip()
+        except Exception as e:
+            print(f"Попытка {attempt + 1} не удалась из-за нагрузки: {e}")
+            if attempt < 2:
+                time.sleep(5)  # Ждем 5 секунд перед повтором
+            else:
+                raise e
 
 
 def send_to_telegram(text):
